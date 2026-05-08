@@ -90,6 +90,6 @@ body {
   content: '▋';
   display: inline-block;
   animation: blink 1s step-end infinite;
-  color: #3b82f6;
+  color: #16a34a;
   margin-left: 2px;
 }

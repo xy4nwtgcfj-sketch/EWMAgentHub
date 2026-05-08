@@ -45,8 +45,8 @@ export function Message({ message, isStreaming }: Props) {
         )}
       >
         {!isUser && (
-          <div className="shrink-0 w-7 h-7 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center mt-0.5">
-            <Bot className="w-3.5 h-3.5 text-blue-400" />
+          <div className="shrink-0 w-7 h-7 rounded-full bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center mt-0.5">
+            <Bot className="w-3.5 h-3.5 text-emerald-400" />
           </div>
         )}
 
@@ -125,11 +125,12 @@ export function Message({ message, isStreaming }: Props) {
               </button>
               <button
                 onClick={() => setShowSave(true)}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-slate-500 hover:text-blue-400 rounded-md hover:bg-surface-overlay transition-all"
+                className="flex items-center gap-1 px-2 py-1 text-xs text-slate-500 hover:text-emerald-400 rounded-md hover:bg-surface-overlay transition-all"
               >
                 <BookmarkPlus className="w-3 h-3" />
                 {savedId ? `Saved (${savedId})` : 'Save as artefact'}
               </button>
+
             </div>
           )}
         </div>
