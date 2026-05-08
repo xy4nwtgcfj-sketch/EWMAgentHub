@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EWM Agent Hub</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #030712;
+      --surface:   #0f172a;
+      --border:    #1e293b;
+      --text:      #f1f5f9;
+      --muted:     #64748b;
+      --subtle:    #94a3b8;
+
+      --blue:   #3b82f6; --blue-dim:   #1e3a5f20; --blue-border:   #1e3a5f;  --blue-tag:   #1e40af;
+      --violet: #8b5cf6; --violet-dim: #2e1b6920; --violet-border: #2e1b69;  --violet-tag: #4c1d95;
+      --teal:   #14b8a6; --teal-dim:   #0f3b3820; --teal-border:   #0f3b38;  --teal-tag:   #134e4a;
+      --amber:  #f59e0b; --amber-dim:  #451a0320; --amber-border:  #451a03;  --amber-tag:  #78350f;
+      --green:  #22c55e; --green-dim:  #052e1620; --green-border:  #052e16;  --green-tag:  #14532d;
+      --orange: #f97316; --orange-dim: #431a0120; --orange-border: #431a01;  --orange-tag: #7c2d12;
+      --pink:   #ec4899; --pink-dim:   #4a044e20; --pink-border:   #4a044e;  --pink-tag:   #831843;
+      --red:    #ef4444; --red-dim:    #450a0a20; --red-border:    #450a0a;  --red-tag:    #7f1d1d;
+      --indigo: #6366f1; --indigo-dim: #1e1b4b20; --indigo-border: #1e1b4b; --indigo-tag: #312e81;
+
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    }
+
+    body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(15,23,42,.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: 1280px; margin: 0 auto; padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-mark {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 13px; color: #fff; letter-spacing: -.5px;
+    }
+    .logo-text h1 { font-size: 14px; font-weight: 600; line-height: 1; }
+    .logo-text p  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .status {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--muted);
+    }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* ── Hero ── */
+    .hero { max-width: 1280px; margin: 0 auto; padding: 52px 24px 36px; }
+    .hero h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 700; letter-spacing: -.5px; }
+    .hero p   { margin-top: 10px; color: var(--subtle); font-size: 15px; line-height: 1.65; max-width: 580px; }
+    .stats    { display: flex; gap: 14px; margin-top: 28px; flex-wrap: wrap; }
+    .stat {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 22px;
+    }
+    .stat-val  { font-size: 26px; font-weight: 700; }
+    .stat-lbl  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Grid ── */
+    main { max-width: 1280px; margin: 0 auto; padding: 0 24px 80px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 18px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface); border-radius: 18px; padding: 20px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .card-header { display: flex; align-items: center; justify-content: space-between; }
+    .card-title  { font-size: 13px; font-weight: 600; }
+    .tag {
+      font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 99px;
+    }
+
+    /* ── Command item ── */
+    .cmd-list { display: flex; flex-direction: column; gap: 8px; }
+    .cmd-item {
+      border-radius: 11px; padding: 10px 12px;
+      display: flex; align-items: flex-start; gap: 9px;
+    }
+    .cmd-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+    .cmd-body { min-width: 0; }
+    .cmd-syntax {
+      font-family: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+      font-size: 11.5px; color: var(--text); word-break: break-all; line-height: 1.5;
+    }
+    .cmd-desc { font-size: 11.5px; color: var(--muted); margin-top: 2px; line-height: 1.45; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center; padding: 24px;
+      font-size: 12px; color: var(--muted); border-top: 1px solid var(--border);
+    }
+    footer code { font-family: monospace; color: var(--subtle); }
+
+    /* ── Per-category colours ── */
+    .c-blue   { border: 1px solid var(--blue-border);   }
+    .c-violet { border: 1px solid var(--violet-border); }
+    .c-teal   { border: 1px solid var(--teal-border);   }
+    .c-amber  { border: 1px solid var(--amber-border);  }
+    .c-green  { border: 1px solid var(--green-border);  }
+    .c-orange { border: 1px solid var(--orange-border); }
+    .c-pink   { border: 1px solid var(--pink-border);   }
+    .c-red    { border: 1px solid var(--red-border);    }
+    .c-indigo { border: 1px solid var(--indigo-border); }
+
+    .tag-blue   { background: var(--blue-tag);   color: #93c5fd; }
+    .tag-violet { background: var(--violet-tag); color: #c4b5fd; }
+    .tag-teal   { background: var(--teal-tag);   color: #5eead4; }
+    .tag-amber  { background: var(--amber-tag);  color: #fcd34d; }
+    .tag-green  { background: var(--green-tag);  color: #86efac; }
+    .tag-orange { background: var(--orange-tag); color: #fdba74; }
+    .tag-pink   { background: var(--pink-tag);   color: #f9a8d4; }
+    .tag-red    { background: var(--red-tag);    color: #fca5a5; }
+    .tag-indigo { background: var(--indigo-tag); color: #a5b4fc; }
+
+    .item-blue   { background: var(--blue-dim); }
+    .item-violet { background: var(--violet-dim); }
+    .item-teal   { background: var(--teal-dim); }
+    .item-amber  { background: var(--amber-dim); }
+    .item-green  { background: var(--green-dim); }
+    .item-orange { background: var(--orange-dim); }
+    .item-pink   { background: var(--pink-dim); }
+    .item-red    { background: var(--red-dim); }
+    .item-indigo { background: var(--indigo-dim); }
+
+    .dot-blue   { background: var(--blue); }
+    .dot-violet { background: var(--violet); }
+    .dot-teal   { background: var(--teal); }
+    .dot-amber  { background: var(--amber); }
+    .dot-green  { background: var(--green); }
+    .dot-orange { background: var(--orange); }
+    .dot-pink   { background: var(--pink); }
+    .dot-red    { background: var(--red); }
+    .dot-indigo { background: var(--indigo); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">EW</div>
+      <div class="logo-text">
+        <h1>EWM Agent Hub</h1>
+        <p>SAP Extended Warehouse Management</p>
+      </div>
+    </div>
+    <div class="status"><span class="dot"></span> Claude Code</div>
+  </div>
+</header>
+
+<section class="hero">
+  <h2>AI agents for the full EWM lifecycle</h2>
+  <p>Run any command below in Claude Code to generate implementation-ready outputs — proposals, functional specs, ABAP code, test scripts, runbooks, and more.</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-val">30+</div><div class="stat-lbl">Agent commands</div></div>
+    <div class="stat"><div class="stat-val">9</div><div class="stat-lbl">Output types</div></div>
+    <div class="stat"><div class="stat-val">3</div><div class="stat-lbl">Chained workflows</div></div>
+  </div>
+</section>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  Open this project in Claude Code and type any command to generate outputs →
+  <code>outputs/</code>
+</footer>
+
+<script>
+const categories = [
+  {
+    title: "Pre-Sales", color: "blue",
+    commands: [
+      { cmd: "/rfp [client] [industry]",                    desc: "Full proposal response from RFP documents" },
+      { cmd: "/estimate [scope]",                           desc: "Effort estimate by phase and role with risk buffer" },
+      { cmd: "/demo-script [client] [industry] [pain points]", desc: "Story-driven EWM demo script" },
+    ]
+  },
+  {
+    title: "Workshops & Specifications", color: "violet",
+    commands: [
+      { cmd: "/workshop-prep [process area] [duration]",    desc: "Timed agenda, 20+ discovery questions, decision points" },
+      { cmd: "/minutes [topic]",                            desc: "Convert raw notes to structured minutes with action items" },
+      { cmd: "/fs [title] [description]",                   desc: "Complete Functional Specification with Mermaid process flow" },
+      { cmd: "/ts [fs-filename]",                           desc: "Technical Specification linked to parent FS" },
+      { cmd: "/gap-analysis",                               desc: "Classify requirements A–E against standard EWM" },
+      { cmd: "/process-flow [process name]",                desc: "Mermaid swimlane flowchart with legend" },
+    ]
+  },
+  {
+    title: "System Configuration", color: "teal",
+    commands: [
+      { cmd: "/config-guide [topic] [ewm-version]",         desc: "Step-by-step IMG guide with transaction codes and rationale" },
+      { cmd: "/config-workbook [warehouse]",                desc: "Structured workbook: structure, strategies, queue management" },
+      { cmd: "/config-check",                               desc: "RAG-rated review of config workbook for inconsistencies" },
+    ]
+  },
+  {
+    title: "WRICEF Coding", color: "amber",
+    commands: [
+      { cmd: "/badi [badi-name] [requirement]",             desc: "Production-quality ABAP with interface, logic, unit tests" },
+      { cmd: "/code-review [filename]",                     desc: "Clean ABAP compliance, performance, security audit" },
+      { cmd: "/report [name] [selections] [outputs]",       desc: "Full ALV report using CL_SALV_TABLE" },
+      { cmd: "/interface [type] [description]",             desc: "IDoc / BAPI / REST / RFC with mapping and error handling" },
+      { cmd: "/batch-ts",                                   desc: "Generate TS stubs for every WRICEF in inventory" },
+      { cmd: "/batch-code",                                 desc: "Generate ABAP stubs for all TS files without code" },
+    ]
+  },
+  {
+    title: "Testing", color: "green",
+    commands: [
+      { cmd: "/test-scripts [process] [format]",            desc: "Happy path + error scenarios (step-by-step · BDD · SolMan · Xray)" },
+      { cmd: "/uat-package [role]",                         desc: "Role-based UAT package in plain business language" },
+      { cmd: "/triage [defect]",                            desc: "Root cause classification, investigation steps, workaround" },
+      { cmd: "/regression [changes]",                       desc: "Minimum regression scope with priority order" },
+    ]
+  },
+  {
+    title: "Cutover & Migration", color: "orange",
+    commands: [
+      { cmd: "/runbook [warehouse] [go-live-date]",         desc: "Detailed cutover runbook T-5 to T-0 with rollback criteria" },
+      { cmd: "/go-nogo [project]",                          desc: "Go/No-Go checklist by category with RAG scorecard" },
+    ]
+  },
+  {
+    title: "Training & Go-Live", color: "pink",
+    commands: [
+      { cmd: "/training [role] [format]",                   desc: "Role-specific material: job-aid · guide · e-learning · train-the-trainer" },
+      { cmd: "/release-notes [release] [audience]",         desc: "Change summary for business users · key users · IT · management" },
+    ]
+  },
+  {
+    title: "AMS, Compliance & Upgrades", color: "red",
+    commands: [
+      { cmd: "/incident [description]",                     desc: "Classify, root-cause, investigate, resolve" },
+      { cmd: "/knowledge-article [issue] [cause] [resolution]", desc: "Reusable KB article with prevention notes" },
+      { cmd: "/compliance [regulation] [process]",          desc: "IQ/OQ/PQ validation documentation and gap analysis" },
+      { cmd: "/upgrade-assessment [current] [target]",      desc: "Breaking changes, Clean Core risk, remediation effort" },
+    ]
+  },
+  {
+    title: "Chained Workflows", color: "indigo",
+    commands: [
+      { cmd: "/chain-blueprint [process area]",             desc: "Workshop prep → minutes → FS → gap analysis in sequence" },
+      { cmd: "/chain-build [fs-filename]",                  desc: "FS → TS → code → test scripts in sequence" },
+      { cmd: "/chain-full",                                 desc: "Full pipeline: batch TS → batch code → test scripts for all WRICEFs" },
+    ]
+  },
+];
+
+const grid = document.getElementById("grid");
+categories.forEach(({ title, color, commands }) => {
+  const card = document.createElement("div");
+  card.className = `card c-${color}`;
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="card-title">${title}</span>
+      <span class="tag tag-${color}">${commands.length} ${commands.length === 1 ? "command" : "commands"}</span>
+    </div>
+    <div class="cmd-list">
+      ${commands.map(({ cmd, desc }) => `
+        <div class="cmd-item item-${color}">
+          <span class="cmd-dot dot-${color}"></span>
+          <div class="cmd-body">
+            <div class="cmd-syntax">${cmd}</div>
+            <div class="cmd-desc">${desc}</div>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+  grid.appendChild(card);
+});
+</script>
+
+</body>
+</html>
